@@ -50,6 +50,8 @@ int main(void) {
 		return EXIT_SUCCESS;
 	}
 
+	printf("set up completed, ready to work\n");
+
 	my_message_t rmsg;
 	int rcvid;
 	while(1){
