@@ -1,0 +1,31 @@
+@startuml sequenceDiagram
+    participant W as "Writer Thread"
+    participant R as "Reader Thread"
+    participant M as "Mutex"
+    participant C as "Condition Variable"
+
+    Note over R: Preparing to wait
+    R->>M: lock()
+    activate R
+    R->>R: Check condition (it's false)
+    Note over R: Is about to call wait()
+    deactivate R
+
+    Note over W: Update is ready
+    W->>M: lock()
+    activate W
+    W->>W: Update shared data
+    Note over W: Now, W does a premature unlock
+    W->>M: unlock()
+    deactivate W
+
+    Note over M,C: The Race! The mutex is unlocked, and W sends notify.
+    W->>C: notify_all()
+    Note over C: The signal is sent, but R is not yet waiting!
+    
+    activate R
+    R->>C: wait()
+    Note over R,C: R is now in wait state.
+    deactivate R
+    Note over R: R is now blocked forever (or until next update)
+    R-->>R: Zzzzz...

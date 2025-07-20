@@ -1,0 +1,25 @@
+@startuml sequenceDiagram
+    participant W as "Writer Thread"
+    participant R as "Reader Thread"
+    participant M as "Mutex"
+    participant C as "Condition Variable"
+
+    Note over W: Data update is needed
+    W->>M: lock()
+    activate W
+    W->>W: Update shared data
+    Note over W: Data updated
+    W->>C: notify_all()
+    W->>M: unlock()
+    deactivate W
+
+    Note over R: Waiting for data update
+    R->>M: lock()
+    activate R
+    Note over M,R: The lock is busy, so R blocks
+    R-->>M: ...waits...
+    M-->>R: Mutex available
+    Note over R: Acquires lock after W unlocks
+    R->>R: Check condition (it's now true)
+    R->>R: Continues without waiting
+    deactivate R
